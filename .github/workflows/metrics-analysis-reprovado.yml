@@ -23,7 +23,7 @@ jobs:
 
       - name: IA analisa métricas
         env:
-          GROQCLOUD_API_KEY: ${{ secrets.GROQCLOUD_API_KEY }}
+          GROQCLOUD_API_KEY: ${{ secrets.GROKCLOUD_API_KEY }}
 
         run: |
 
