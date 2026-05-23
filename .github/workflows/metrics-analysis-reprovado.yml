@@ -23,7 +23,7 @@ jobs:
  
       - name: IA analisa métricas - reprovado pela IA
         env:
-          GROQCLOUD_API_KEY: ${{ secrets.GROQCLOUD_API_KEY }}
+          GROQCLOUD_API_KEY: ${{ secrets.GROKCLOUD_API_KEY }}
  
         run: |
  
@@ -39,7 +39,8 @@ jobs:
               \"messages\": [
                 {
                   \"role\": \"system\",
-                  \"content\": \"Você é um classificador binário. Responda APENAS 'APROVADO' ou 'REPROVADO'.\\nThresholds críticos:\\n- CPU >= 80% → REPROVADO\\n- Memory >= 85% → REPROVADO\\n- Latency >= 2000ms → REPROVADO\\n- Error Rate >= 5% → REPROVADO\\nExemplos:\\n{\\\"cpu\\\":15,\\\"memory\\\":30,\\\"latency_ms\\\":50,\\\"error_rate\\\":0.05} → APROVADO\\n{\\\"cpu\\\":90,\\\"memory\\\":50,\\\"latency_ms\\\":100,\\\"error_rate\\\":1} → REPROVADO\\nResponda APENAS a classificação, nada mais.\"
+                  \"content\": \"Você é um classificador binário. Responda APENAS 'APROVADO' ou 'REPROVADO'.\\nThresholds críticos:\\n- CPU >= 80% → REPROVADO\\n- Memory >= 85% → REPROVADO\\n- Latency >= 2000ms → REPROVADO\\n- Error Rate >= 5% → REPROVADO\\nExemplos:\\n{\\\"cpu\\\":15,\\\"memory\\\":30,\\\"latency_ms\\\":50,\\\"error_rate\\\":0.05} → APROVADO\\n{\\\"cpu\\\":90,\\\"memory\\\":50,\\\"latency_ms\\\":100,\\\"error_rate\\\":1} → REPROVADO\\nResponda APENAS a classificação, Mesmo quando APROVADO, forneça sugestões de otimização se houver oportunidade.
+            Não escreva nenhum texto fora do JSON.\".\"
                 },
                 {
                   \"role\": \"user\",
@@ -51,6 +52,8 @@ jobs:
           echo "$RESPONSE"
  
           DECISION=$(echo "$RESPONSE" | python3 -c "import sys,json; r=json.load(sys.stdin); print(r['choices'][0]['message']['content'])")
+
+          IMPROVEMENTS=$(echo "$AI_CONTENT" | jq -r '.melhorias[]')
  
           echo "$DECISION"
  
@@ -61,6 +64,10 @@ jobs:
               --body "$DECISION")
  
             echo "$ISSUE_URL"
+
+            echo ""
+            echo "Melhorias sugeridas:"
+            echo "$IMPROVEMENTS"
  
             exit 1
  
