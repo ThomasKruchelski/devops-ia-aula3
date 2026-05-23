@@ -43,7 +43,7 @@ jobs:
                 },
                 {
                   \"role\": \"user\",
-                  \"content\": \"$METRICS\"
+                  \"content\": \" Cobertura de metricas: '"$METRICS"'% Deve avançar para produção? Caso não que alterações você recomenda? /"
                 }
               ]
             }")
