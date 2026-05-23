@@ -1,0 +1,7 @@
+{
+ "cpu": 15,
+ "memory": 30,
+ "latency_ms": 50,
+ "error_rate": 0.05
+}
+ 
