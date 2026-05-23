@@ -1,0 +1,48 @@
+name: Deploy com IA
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  deploy-smoke-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Clonar repositório
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Instalar dependências
+        run: |
+          pip install pytest
+
+      - name: Rodar testes de deploy
+        env:
+          PYTHONPATH: .
+        run: |
+          pytest tests_deploy -q | tee deploy-test-output.txt || true
+          echo "TEST_EXIT_CODE=$?" >> $GITHUB_ENV
+
+      - name: Consultar IA — Análise de deploy
+        env:
+          GROQCLOUD_API_KEY: ${{ secrets.GROKCLOUD_API_KEY }}
+        run: |
+          echo "Lendo resultado dos testes de deploy..."
+          TEST_EXIT_CODE=${{ env.TEST_EXIT_CODE }}
+          TEST_STATUS="PASSOU"
+          if [ "$TEST_EXIT_CODE" -ne 0 ]; then
+            TEST_STATUS="FALHOU"
+          fi
+          DEPLOY_LOGS=$(tail -n 20 deploy-test-output.txt | sed 's/"/\\"/g')
+
+          RESPONSE=$(curl -s https://api.groq.com/openai/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $GROQCLOUD_API_KEY" \
+            -d '{\n              "model": "llama-3.1-8b-instant",\n              "messages": [\n                {\n                  "role": "system",\n                  "content": "Você é um especialista em pipelines CI/CD e deploy. Responda apenas APROVADO ou BLOQUEADO seguido de uma justificativa curta."\n                },\n                {\n                  "role": "user",\n                  "content": "Os testes de deploy smoke test '"$TEST_STATUS"' no projeto Python. Últimas linhas dos logs: '
