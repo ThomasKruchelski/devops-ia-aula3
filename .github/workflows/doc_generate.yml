@@ -33,7 +33,7 @@ jobs:
 
       - name: IA gera documentação
         env:
-          GROQ_API_KEY: ${{ secrets.GROK_API_KEY }}
+          GROQ_API_KEY: ${{ secrets.GROKCLOUD_API_KEY }}
 
         run: |
 
