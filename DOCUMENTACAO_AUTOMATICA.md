@@ -1,7 +1,7 @@
 {
   "error": {
-    "message": "Invalid API Key",
-    "type": "invalid_request_error",
-    "code": "invalid_api_key"
+    "message": "Request too large for model `llama-3.1-8b-instant` in organization `org_01ksabeb2nfxw9hycydzdh9st7` service tier `on_demand` on tokens per minute (TPM): Limit 6000, Requested 10433, please reduce your message size and try again. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing",
+    "type": "tokens",
+    "code": "rate_limit_exceeded"
   }
 }
