@@ -33,7 +33,7 @@ jobs:
 
       - name: IA gera documentação
         env:
-          GROQCLOUD_API_KEY: ${{ secrets.GROQCLOUD_API_KEY }}
+          GROQCLOUD_API_KEY: ${{ secrets.GROKCLOUD_API_KEY }}
 
         run: |
 
@@ -54,7 +54,7 @@ jobs:
               ]
             }')
 
-          DOC=$(echo "$RESPONSE" | python3 -c "import sys,json; r=json.load(sys.stdin); print(r['choices'][0]['message']['content'])")
+          DOC=$(echo "$RESPONSE" | python3 -c "import sys,json; r=json.load(sys.stdin); print(r['choices'][0]['message']['content'] if 'choices' in r else 'Erro ao consultar IA')")
 
           echo "$DOC" > DOCUMENTACAO_AUTOMATICA.md
 
