@@ -55,6 +55,11 @@ jobs:
             }')
 
           DOC=$(echo "$RESPONSE" | python3 -c "import sys,json; r=json.load(sys.stdin); print(r['choices'][0]['message']['content'] if 'choices' in r else 'Erro ao consultar IA')")
+          
+
+          echo "$resposta no DOC"
+
+          echo "$RESPONSE"
 
           echo "$DOC" > DOCUMENTACAO_AUTOMATICA.md
 
