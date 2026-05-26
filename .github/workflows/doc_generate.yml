@@ -54,7 +54,7 @@ jobs:
               ]
             }')
 
-          DOC=$(echo "$RESPONSE" | python3 -c "import sys, json r=json.load(sys.stdin) print(r['choices'][0]['message']['content'])")
+          DOC=$(echo "$RESPONSE" | python3 -c "import sys, jsonr=json.load(sys.stdin) print(r['choices'][0]['message']['content'])")
 
           echo "$DOC" > DOCUMENTACAO_AUTOMATICA.md
 
