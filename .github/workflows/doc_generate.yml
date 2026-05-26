@@ -1,0 +1,71 @@
+name: IA gerando documentação
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+
+  gerar-documentacao:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+      - name: Clonar repositório
+        uses: actions/checkout@v4
+
+      - name: Capturar último commit
+        id: commit_data
+        run: |
+
+          echo "COMMIT_MSG<<EOF" >> $GITHUB_ENV
+          git log -1 --pretty=%B >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+          echo "DIFF<<EOF" >> $GITHUB_ENV
+          git show --stat --patch HEAD >> $GITHUB_ENV
+          echo "EOF" >> $GITHUB_ENV
+
+      - name: IA gera documentação
+        env:
+          GROQCLOUD_API_KEY: ${{ secrets.GROQCLOUD_API_KEY }}
+
+        run: |
+
+          RESPONSE=$(curl -s https://api.groq.com/openai/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $GROQCLOUD_API_KEY" \
+            -d '{
+              "model": "llama-3.1-8b-instant",
+              "messages": [
+                {
+                  "role": "system",
+                  "content": "Você é um engenheiro de software especialista em documentação técnica."
+                },
+                {
+                  "role": "user",
+                  "content": "Analise este commit e gere documentação técnica em markdown.\n\nMensagem do commit:\n'"$COMMIT_MSG"'\n\nAlterações:\n'"$DIFF"'"
+                }
+              ]
+            }')
+
+          DOC=$(echo "$RESPONSE" | python3 -c "import sys, json r=json.load(sys.stdin) print(r['choices'][0]['message']['content'])")
+
+          echo "$DOC" > DOCUMENTACAO_AUTOMATICA.md
+
+      - name: Commitar documentação
+        run: |
+
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+          git add DOCUMENTACAO_AUTOMATICA.md
+
+          git commit -m "docs: documentação automática gerada pela IA" || echo "Nada para commitar"
+
+          git push
