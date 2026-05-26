@@ -27,8 +27,8 @@ jobs:
           git log -1 --pretty=%B >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
-          echo "DIFF<<EOF" >> $GITHUB_ENV
-          git show --stat --patch HEAD >> $GITHUB_ENV
+          echo "DIFF_SUMMARY<<EOF" >> $GITHUB_ENV
+          git --no-pager show --stat --format=short --name-only HEAD | sed -n '1,200p' >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: IA gera documentação
@@ -39,9 +39,11 @@ jobs:
 
           PROMPT=$(jq -n \
             --arg msg "$COMMIT_MSG" \
-            --arg diff "$DIFF" \
+            --arg diff "$DIFF_SUMMARY" \
             '{
               model: "llama-3.1-8b-instant",
+              max_tokens: 1200,
+              temperature: 0.2,
               messages: [
                 {
                   role: "system",
@@ -49,7 +51,7 @@ jobs:
                 },
                 {
                   role: "user",
-                  content: ("Analise este commit e gere documentação técnica em markdown.\n\nMensagem do commit:\n" + $msg + "\n\nAlterações:\n" + $diff)
+                  content: ("Analise este commit e gere documentação técnica em markdown.\n\nMensagem do commit:\n" + $msg + "\n\nResumo das alterações:\n" + $diff)
                 }
               ]
             }')
