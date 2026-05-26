@@ -28,7 +28,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
           echo "DIFF<<EOF" >> $GITHUB_ENV
-          git show --stat --patch HEAD >> $GITHUB_ENV
+          git show --stat --patch HEAD| head -c 5000 >> $GITHUB_ENV
           echo "EOF" >> $GITHUB_ENV
 
       - name: IA gera documentação
