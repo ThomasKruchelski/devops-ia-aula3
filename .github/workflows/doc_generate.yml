@@ -32,46 +32,45 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: IA gera documentação
-  env:
-    GROQ_API_KEY: ${{ secrets.GROQ_API_KEY }}
+        env:
+          GROQ_API_KEY: ${{ secrets.GROK_API_KEY }}
 
-  run: |
+        run: |
 
-    PROMPT=$(jq -n \
-      --arg msg "$COMMIT_MSG" \
-      --arg diff "$DIFF" \
-      '{
-        model: "llama-3.1-8b-instant",
-        messages: [
-          {
-            role: "system",
-            content: "Você é um engenheiro de software especialista em documentação técnica."
-          },
-          {
-            role: "user",
-            content: ("Analise este commit e gere documentação técnica em markdown.\n\nMensagem do commit:\n" + $msg + "\n\nAlterações:\n" + $diff)
-          }
-        ]
-      }')
+          PROMPT=$(jq -n \
+            --arg msg "$COMMIT_MSG" \
+            --arg diff "$DIFF" \
+            '{
+              model: "llama-3.1-8b-instant",
+              messages: [
+                {
+                  role: "system",
+                  content: "Você é um engenheiro de software especialista em documentação técnica."
+                },
+                {
+                  role: "user",
+                  content: ("Analise este commit e gere documentação técnica em markdown.\n\nMensagem do commit:\n" + $msg + "\n\nAlterações:\n" + $diff)
+                }
+              ]
+            }')
 
-    RESPONSE=$(curl -s https://api.groq.com/openai/v1/chat/completions \
-      -H "Content-Type: application/json" \
-      -H "Authorization: Bearer $GROQ_API_KEY" \
-      -d "$PROMPT")
+          RESPONSE=$(curl -s https://api.groq.com/openai/v1/chat/completions \
+            -H "Content-Type: application/json" \
+            -H "Authorization: Bearer $GROQ_API_KEY" \
+            -d "$PROMPT")
 
-    echo "$RESPONSE"
+          echo "$RESPONSE"
 
-    DOC=$(echo "$RESPONSE" | python3 -c "
-import sys, json
-r=json.load(sys.stdin)
+          DOC=$(echo "$RESPONSE" | python3 -c "
+          import sys, json
+          r=json.load(sys.stdin)
 
-if 'choices' in r:
-    print(r['choices'][0]['message']['content'])
-else:
-    print(json.dumps(r, indent=2, ensure_ascii=False))
-")
+          if 'choices' in r:
+              print(r['choices'][0]['message']['content'])
+          else:
+              print(json.dumps(r, indent=2, ensure_ascii=False))")
 
-    echo "$DOC" > DOCUMENTACAO_AUTOMATICA.md
+          echo "$DOC" > DOCUMENTACAO_AUTOMATICA.md
 
       - name: Commitar documentação
         run: |
