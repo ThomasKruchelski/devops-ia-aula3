@@ -1,0 +1,1 @@
+Erro ao consultar IA
